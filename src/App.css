@@ -1,38 +1,63 @@
-.App {
+/* 노멀라이즈 */
+* {
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+li,
+ul {
+  list-style: none;
+}
+
+/* 카카오프렌즈 mbti 클론 시작 */
+
+body {
+  background-color: #a6c0d5;
+}
+
+.topBox {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.innerBox {
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.topBox .btn {
+  background-color: #fbe400;
+  color: #001c00;
+  border: none;
+  padding: 10px 40px;
+  font-weight: bold;
+  font-size: 18px;
+  border-radius: 5px;
+  box-shadow: 2px 2px 4px gray;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.progressBar {
+  width: 100%;
+  background-color: #fff;
+  height: 30px;
+  border-radius: 12px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.percent {
+  background-color: #fbe400;
+  height: 30px;
+  border-radius: 12px;
 }
 
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.imgBox {
+  margin-top: 60px;
+  margin-bottom: 60px;
 }
