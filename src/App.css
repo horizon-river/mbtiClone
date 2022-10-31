@@ -61,3 +61,8 @@ body {
   margin-top: 60px;
   margin-bottom: 60px;
 }
+
+.answerBox {
+  font-weight: bold;
+  font-size: 4rem;
+}

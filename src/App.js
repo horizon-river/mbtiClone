@@ -1,7 +1,9 @@
 import React from "react";
 import "./App.css";
 
-import { Routes, Route, useNavigate } from "react-router-dom";
+import axios from "axios";
+
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
 const ProgressBar = (props) => {
   // 총너비 / 총스텝길이 * 현재스텝
@@ -22,8 +24,6 @@ const Question = (props) => {
 };
 
 const Answer = (props) => {
-  const navigation = useNavigate();
-
   const { setDispatchType } = React.useContext(StoreContext);
 
   return (
@@ -36,14 +36,6 @@ const Answer = (props) => {
             value: props.value,
           },
         });
-        const pathName = window.location.pathname;
-        const nextStep = parseInt(pathName.charAt(pathName.length - 1)) + 1;
-
-        if (nextStep === 6) {
-          navigation("/result");
-        } else {
-          navigation(`/sub${nextStep}`);
-        }
       }}
     >
       {props.text}
@@ -166,7 +158,40 @@ function Sub5() {
 }
 
 function Result() {
-  return <div>결과화면 !!</div>;
+  const { state } = useLocation();
+
+  const [answer, setAnswer] = React.useState("");
+
+  // axios
+  const getMBTIResult = () => {
+    axios({
+      url: "http://localhost:5000/mbti",
+      method: "get", // GET , POST
+      responseType: "json",
+      params: state,
+    })
+      .then((response) => {
+        const getAnswer = response.data;
+        console.log(state);
+        console.log(getAnswer);
+        setAnswer(getAnswer);
+      })
+      .catch((e) => {
+        console.log("에러!!!", e);
+      });
+  };
+
+  React.useEffect(() => {
+    getMBTIResult();
+  }, []);
+
+  return (
+    <div className="topBox">
+      <div className="innerBox">
+        <div className="answerBox">당신의 성향은 {answer}입니다!</div>
+      </div>
+    </div>
+  );
 }
 
 function Sub() {
@@ -193,6 +218,8 @@ function Sub() {
 const StoreContext = React.createContext({});
 
 function App() {
+  const navigation = useNavigate();
+
   const [dispatch, setDispatchType] = React.useState({
     code: null,
     params: null,
@@ -217,6 +244,8 @@ function App() {
     },
   ]);
 
+  let [page, setPage] = React.useState(1);
+
   React.useEffect(() => {
     switch (dispatch.code) {
       /**
@@ -228,21 +257,32 @@ function App() {
 
         const newMbti = [...mbti];
 
-        newMbti.map((item) => {
-          if (value in item) {
-            return item[value]++;
-          }
-          return item;
+        const findIndex = newMbti.findIndex((item) => {
+          return item[value] !== undefined;
         });
 
+        newMbti[findIndex][value]++;
         setMbti(newMbti);
 
-        console.log(mbti);
+        /**
+         * 페이지 이동
+         */
+        const nextPage = (page += 1);
+        setPage(nextPage);
+
+        if (nextPage === 6) {
+          navigation("/result", {
+            state: mbti,
+          });
+        } else {
+          navigation(`/sub${nextPage}`);
+        }
 
         break;
       default:
         break;
     }
+    // 의존성
   }, [dispatch]);
 
   return (
