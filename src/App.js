@@ -49,27 +49,26 @@ function Main() {
   const navigation = useNavigate();
 
   React.useEffect(() => {
-    const checkMbti = JSON.parse(localStorage.getItem("mbti"));
-    const checkPage = Number(localStorage.getItem("page"));
+    window.onload = function () {
+      const checkMbti = JSON.parse(localStorage.getItem("mbti"));
+      const checkPage = Number(localStorage.getItem("page"));
 
-    if (checkMbti !== null && checkPage !== null) {
-      if (window.confirm("이어서 하시겠습니까?")) {
-        setDispatchType({
-          code: "이어서",
-          params: {
-            checkMbti: checkMbti,
-            checkPage: checkPage,
-          },
-        });
-      } else {
-        setDispatchType({
-          code: "이어서안함",
-          params: {
-            value: 0,
-          },
-        });
+      if (checkMbti !== null && checkPage !== null) {
+        if (window.confirm("이어서 하시겠습니까?")) {
+          setDispatchType({
+            code: "이어서",
+            params: {
+              checkMbti: checkMbti,
+              checkPage: checkPage,
+            },
+          });
+        } else {
+          setDispatchType({
+            code: "이어서안함",
+          });
+        }
       }
-    }
+    };
   });
 
   return (
@@ -325,7 +324,11 @@ function App() {
         const { checkMbti, checkPage } = dispatch.params;
         setMbti(checkMbti);
         setPage(checkPage);
-        navigation(`/sub${page}`);
+        navigation(`/sub${checkPage}`);
+        break;
+      case "이어서안함":
+        localStorage.removeItem("mbti");
+        localStorage.removeItem("page");
         break;
       default:
         break;
