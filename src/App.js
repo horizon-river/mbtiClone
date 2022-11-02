@@ -44,7 +44,33 @@ const Answer = (props) => {
 };
 
 function Main() {
+  const { setDispatchType } = React.useContext(StoreContext);
+
   const navigation = useNavigate();
+
+  React.useEffect(() => {
+    const checkMbti = JSON.parse(localStorage.getItem("mbti"));
+    const checkPage = Number(localStorage.getItem("page"));
+
+    if (checkMbti !== null && checkPage !== null) {
+      if (window.confirm("이어서 하시겠습니까?")) {
+        setDispatchType({
+          code: "이어서",
+          params: {
+            checkMbti: checkMbti,
+            checkPage: checkPage,
+          },
+        });
+      } else {
+        setDispatchType({
+          code: "이어서안함",
+          params: {
+            value: 0,
+          },
+        });
+      }
+    }
+  });
 
   return (
     <div className="topBox">
@@ -69,6 +95,9 @@ function Main() {
 }
 
 function Sub1() {
+  localStorage.removeItem("mbti");
+  localStorage.removeItem("page");
+
   return (
     <div className="topBox">
       <div className="innerBox">
@@ -158,23 +187,22 @@ function Sub5() {
 }
 
 function Result() {
-  const { state } = useLocation();
+  const navigation = useNavigate();
 
-  const [answer, setAnswer] = React.useState("");
+  const { state } = useLocation();
+  const [result, setResult] = React.useState(undefined);
 
   // axios
-  const getMBTIResult = () => {
-    axios({
+  const getMBTIResult = async () => {
+    await axios({
       url: "http://localhost:5000/mbti",
       method: "get", // GET , POST
       responseType: "json",
       params: state,
     })
-      .then((response) => {
-        const getAnswer = response.data;
-        console.log(state);
-        console.log(getAnswer);
-        setAnswer(getAnswer);
+      .then(({ data }) => {
+        console.log(data);
+        setResult(data);
       })
       .catch((e) => {
         console.log("에러!!!", e);
@@ -185,32 +213,21 @@ function Result() {
     getMBTIResult();
   }, []);
 
-  return (
-    <div className="topBox">
-      <div className="innerBox">
-        <div className="answerBox">당신의 성향은 {answer}입니다!</div>
-      </div>
-    </div>
-  );
-}
-
-function Sub() {
-  const { loginUser } = React.useContext(StoreContext);
-
-  console.log(loginUser);
-
-  const navigation = useNavigate();
+  if (result === undefined) {
+    return <div></div>;
+  }
 
   return (
-    <div>
-      서브페이지
-      <div
+    <div className="answerBox">
+      <img className="result-img" src={result.content} alt="결과화면" />
+      <button
+        className="btn"
         onClick={() => {
-          navigation("/");
+          navigation("/sub1");
         }}
       >
-        메인페이지로 이동
-      </div>
+        다시하기
+      </button>
     </div>
   );
 }
@@ -244,6 +261,25 @@ function App() {
     },
   ]);
 
+  const zeroMbti = [
+    {
+      I: 0, // 내향
+      E: 0, // 외향
+    },
+    {
+      S: 0, // 현실
+      N: 0, // 이상주의
+    },
+    {
+      T: 0, // 이성
+      F: 0, // 감성
+    },
+    {
+      P: 0, // 즉흥
+      J: 0, // 계획
+    },
+  ];
+
   let [page, setPage] = React.useState(1);
 
   React.useEffect(() => {
@@ -267,17 +303,29 @@ function App() {
         /**
          * 페이지 이동
          */
+
         const nextPage = (page += 1);
         setPage(nextPage);
 
         if (nextPage === 6) {
+          setPage(1);
           navigation("/result", {
             state: mbti,
           });
+          setMbti(zeroMbti);
         } else {
           navigation(`/sub${nextPage}`);
         }
 
+        localStorage.setItem("mbti", JSON.stringify(mbti));
+        localStorage.setItem("page", page);
+
+        break;
+      case "이어서":
+        const { checkMbti, checkPage } = dispatch.params;
+        setMbti(checkMbti);
+        setPage(checkPage);
+        navigation(`/sub${page}`);
         break;
       default:
         break;
@@ -289,7 +337,6 @@ function App() {
     <StoreContext.Provider value={{ setDispatchType }}>
       <Routes>
         <Route exact path="/" element={<Main />} />
-        <Route exact path="/sub" element={<Sub />} />
         <Route exact path="/sub1" element={<Sub1 />} />
         <Route exact path="/sub2" element={<Sub2 />} />
         <Route exact path="/sub3" element={<Sub3 />} />
